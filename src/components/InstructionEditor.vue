@@ -13,7 +13,7 @@
           </button>
       </div>
     </editor-menu-bar>
-    <editor-content style="color:white;" :editor="editor" />
+    <editor-content style="color:white;background:grey;" :editor="editor" />
   </div>
 </template>
 

@@ -63,6 +63,170 @@ export default {
     })
   }
 }
+// eslint-disable-next-line camelcase
+// function set_readonly (editor, readonly_ranges) {
+//   let session = editor.getSession()
+//   this.editor.Range = require('ace/range').Range
+//   var ranges = []
+
+//   function before (obj, method, wrapper) {
+//     var orig = obj[method]
+//     obj[method] = function () {
+//       var args = Array.prototype.slice.call(arguments)
+//       return wrapper.call(this, function () {
+//         return orig.apply(obj, args)
+//       }, args)
+//     }
+//     return obj[method]
+//   }
+
+//   function intersects (range) {
+//     return editor.getSelectionRange().intersects(range)
+//   }
+
+//   function intersectsRange (newRange) {
+//     for (var i = 0; i < ranges.length; i++) {
+//       if (newRange.intersects(ranges[i])) {
+//         return true
+//       }
+//     }
+//     return false
+//   }
+
+//   function preventReadonly (next, args) {
+//     for (var i = 0; i < ranges.length; i++) {
+//       if (intersects(ranges[i])) {
+//         return
+//       }
+//     }
+//     next()
+//   }
+
+//   function onEnd (position) {
+//     var row = position.row
+//     var column = position.column
+//     for (var i = 0; i < ranges.length; i++) {
+//       if (ranges[i].end.row === row && ranges[i].end.column === column) {
+//         return true
+//       }
+//     }
+//     return false
+//   }
+
+//   function outSideRange (position) {
+//     var row = position.row
+//     var column = position.column
+//     for (var i = 0; i < ranges.length; i++) {
+//       if (ranges[i].start.row < row && ranges[i].end.row > row) {
+//         return false
+//       }
+//       if (ranges[i].start.row === row && ranges[i].start.column < column) {
+//         if (ranges[i].end.row !== row || ranges[i].end.column > column) {
+//           return false
+//         }
+//       } else if (ranges[i].end.row === row && ranges[i].end.column > column) {
+//         return false
+//       }
+//     }
+//     return true
+//   }
+//   for (var i = 0; i < readonly_ranges.length; i++) {
+//     ranges.push(new Range(...readonly_ranges[i]))
+//   }
+//   ranges.forEach(function (range) {
+//     session.addMarker(range, 'readonly-highlight')
+//   })
+//   session.setMode('ace/mode/javascript')
+//   editor.keyBinding.addKeyboardHandler({
+//     handleKeyboard: function (data, hash, keyString, keyCode, event) {
+//       if (Math.abs(keyCode) === 13 && onEnd(editor.getCursorPosition())) {
+//         return false
+//       }
+//       if (hash === -1 || (keyCode <= 40 && keyCode >= 37)) return false
+
+//       for (i = 0; i < ranges.length; i++) {
+//         if (intersects(ranges[i])) {
+//           return {
+//             command: 'null',
+//             passEvent: false
+//           }
+//         }
+//       }
+//     }
+//   })
+
+//   before(editor, 'onPaste', preventReadonly)
+//   before(editor, 'onCut', preventReadonly)
+//   for (i = 0; i < ranges.length; i++) {
+//     ranges[i].start = session.doc.createAnchor(ranges[i].start)
+//     ranges[i].end = session.doc.createAnchor(ranges[i].end)
+//     ranges[i].end.$insertRight = true
+//   }
+
+//   var old$tryReplace = editor.$tryReplace
+//   editor.$tryReplace = function (range, replacement) {
+//     return intersectsRange(range) ? null : old$tryReplace.apply(this, arguments)
+//   }
+//   session = editor.getSession()
+//   var oldInsert = session.insert
+//   session.insert = function (position, text) {
+//     return oldInsert.apply(this, [position, outSideRange(position) ? text : ''])
+//   }
+//   var oldRemove = session.remove
+//   session.remove = function (range) {
+//     return intersectsRange(range) ? false : oldRemove.apply(this, arguments)
+//   }
+//   var oldMoveText = session.moveText
+//   session.moveText = function (fromRange, toPosition, copy) {
+//     if (intersectsRange(fromRange) || !outSideRange(toPosition)) return fromRange
+//     return oldMoveText.apply(this, arguments)
+//   }
+// }
+
+// function refresheditor (id, content, readonly) {
+//   // eslint-disable-next-line camelcase
+//   var temp_id = id + '_temp'
+//   // eslint-disable-next-line camelcase
+//   document.getElementById(id).innerHTML = "<div id='" + temp_id + "'></div>"
+//   document.getElementById(temp_id).innerHTML = content
+//   var editor = ace.edit(temp_id)
+//   set_readonly(editor, readonly)
+// }
+
+// // eslint-disable-next-line camelcase
+// function get_readonly_by_editable_tag (id, content) {
+//   var text = content.split('\n')
+//   var starts = [0]
+//   var ends = []
+//   text.forEach(function (line, index) {
+//     if ((line.indexOf('&lt;editable&gt;') !== -1)) ends.push(index)
+//     if ((line.indexOf('&lt;/editable&gt;') !== -1)) starts.push(index + 1)
+//   })
+//   ends.push(text.length)
+//   // eslint-disable-next-line camelcase
+//   var readonly_ranges = []
+//   for (var i = 0; i < starts.length; i++) {
+//     readonly_ranges.push([starts[i], 0, ends[i], 0])
+//   }
+//   refresheditor(id, content, readonly_ranges)
+// }
+// var content = document.getElementById('code').innerHTML
+
+// // eslint-disable-next-line camelcase
+// function readonly_lines (id, content, line_numbers) {
+//   // eslint-disable-next-line camelcase
+//   var readonly_ranges = []
+//   // eslint-disable-next-line camelcase
+//   // var all_lines = line_numbers.sort()
+
+//   for (var i = 0; i < line_numbers.length; i++) {
+//     readonly_ranges.push([line_numbers[i] - 1, 0, line_numbers[i], 0])
+//   }
+//   refresheditor(id, content, readonly_ranges)
+// }
+// get_readonly_by_editable_tag('myeditor', content)
+
+// readonly_lines('myeditor', content, [5, 7, 9])
 </script>
 
 <style scoped>

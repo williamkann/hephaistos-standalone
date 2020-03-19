@@ -10,7 +10,18 @@ Le composant 'principale recoit exercise_id et session_id. utiliser watch pour d
       <v-col cols="12" sm="2" md="6">
         <h1>{{ exercise.title }}</h1>
       </v-col>
-      <v-col cols="12" sm="2" md="6">
+      <v-col cols="12" sm="2" md="3">
+         <v-select
+          v-model="select"
+          :items="items"
+          label="Langage"
+          required
+        ></v-select>
+      </v-col>
+      <v-col cols="12" sm="2" md="3">
+        <v-btn class="ma-2" outlined small color="indigo" @click="saveExercise">
+          <v-icon>mdi-content-save</v-icon>
+        </v-btn>
       </v-col>
     </v-row>
     <v-row>
@@ -21,23 +32,56 @@ Le composant 'principale recoit exercise_id et session_id. utiliser watch pour d
     <v-row>
       <v-col cols="12" sm="2" md="6">
         <h2>Tests
-        <v-btn class="ma-2" outlined medium color="indigo" @click="attemptSend(exerciseId, sessionId, value)">
+          <v-btn class="ma-2" outlined small color="indigo" @click="attemptSend(exerciseId, sessionId, value)">
             <v-icon>mdi-fullscreen</v-icon>
           </v-btn>
         </h2>
         <AceEditorTests @input="onAceEditor" :exerciseId="this.exerciseId" :sessionId="this.sessionId"></AceEditorTests>
       </v-col>
       <v-col cols="12" sm="2" md="6">
-        <h2>Template de résolution
-          <v-btn class="ma-2" outlined medium color="indigo" @click="attemptSend(exerciseId, sessionId, value)">
-            <v-icon>mdi-play</v-icon>
-          </v-btn>
-        </h2>
+        <v-row>
+          <v-col cols="12" sm="2" md="8">
+            <h2>Template de résolution
+              <v-btn class="ma-2" outlined small color="indigo" @click="attemptSend(exerciseId, sessionId, value)">
+                <v-icon>mdi-play</v-icon>
+              </v-btn>
+            </h2>
+          </v-col>
+          <v-col cols="12" sm="2" md="4">
+            <v-checkbox v-model="checkbox1" :label="immutable"></v-checkbox>
+          </v-col>
+        </v-row>
         <AceEditorTemplate @input="onAceEditor"></AceEditorTemplate>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" sm="2" md="6">
+        <h2>Sortie de console</h2>
+        <v-card class="mx-auto" color="#4d4d33" dark width="654" v-if="this.results.stats != null">
+          <v-card-title>
+            <v-icon large left>mdi-alert-outline</v-icon>
+            <span class="title font-weight-light">Results</span>
+          </v-card-title>
+          <v-card-text class="font-weight-bold">
+              <p>{{this.results.stats.errors}} Errors</p>
+              <p>{{this.results.stats.skipped}} tests skipped</p>
+              <p>{{testPassed}}/{{this.results.stats.tests}} tests passed</p>
+              <p>Execution time: {{this.results.stats.time }}s</p>
+          </v-card-text>
+        </v-card>
+        <v-expansion-panels v-if="results.tests != null">
+          <v-expansion-panel v-for="test in this.results.tests" :key="test.id">
+            <v-expansion-panel-header>{{test.name}}</v-expansion-panel-header>
+            <div v-if="test.failure != null">
+              <v-expansion-panel-content v-html="test.failure.stacktrace">
+              </v-expansion-panel-content>
+              {{test.failure.message}}
+            </div>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </v-col>
+      <v-col cols="12" sm="2" md="6">
+        <h2>Résultat des tests</h2>
         <div v-if="attempt != ''">
             <v-card class="mx-auto" color="green" dark width="654" v-if="attempt != null && attempt.valid">
               <v-card-title>
@@ -62,29 +106,6 @@ Le composant 'principale recoit exercise_id et session_id. utiliser watch pour d
               </v-card-text>
             </v-card>
         </div>
-        <v-card class="mx-auto" color="#4d4d33" dark width="654" v-if="this.results.stats != null">
-          {{results}}
-          <v-card-title>
-            <v-icon large left>mdi-alert-outline</v-icon>
-            <span class="title font-weight-light">Results</span>
-          </v-card-title>
-          <v-card-text class="font-weight-bold">
-              <p>{{this.results.stats.errors}} Errors</p>
-              <p>{{this.results.stats.skipped}} tests skipped</p>
-              <p>{{testPassed}}/{{this.results.stats.tests}} tests passed</p>
-              <p>Execution time: {{this.results.stats.time }}s</p>
-          </v-card-text>
-        </v-card>
-        <v-expansion-panels v-if="results.tests != null">
-          <v-expansion-panel v-for="test in this.results.tests" :key="test.id">
-            <v-expansion-panel-header>{{test.name}}</v-expansion-panel-header>
-            <div v-if="test.failure != null">
-              <v-expansion-panel-content v-html="test.failure.stacktrace">
-              </v-expansion-panel-content>
-              {{test.failure.message}}
-            </div>
-          </v-expansion-panel>
-        </v-expansion-panels>
       </v-col>
     </v-row>
     </v-alert>
@@ -118,7 +139,11 @@ export default {
   props: ['exerciseId'],
   data: () => ({
     value: '',
-    results: ''
+    results: '',
+    immutable: 'Verrouiller les zones immuables',
+    checkbox1: '',
+    select: '',
+    items: ['python', 'C']
   }),
 
   computed: {
@@ -180,6 +205,10 @@ export default {
     },
     initResult () {
       this.results = ''
+    },
+    saveExercise () {
+      console.log(this.select)
+      console.log(this.exercise)
     }
   }
 }
