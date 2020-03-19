@@ -11,20 +11,32 @@ Le composant 'principale recoit exercise_id et session_id. utiliser watch pour d
         <h1>{{ exercise.title }}</h1>
       </v-col>
       <v-col cols="12" sm="2" md="6">
-        <h2>Tests</h2>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" sm="2" md="12">
+        <InstructionEditor :exerciseId="this.exerciseId" :sessionId="this.sessionId"></InstructionEditor>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" sm="2" md="6">
-        <InstructionEditor :exerciseId="this.exerciseId"></InstructionEditor>
-        <h3>
-          Votre Solution
+        <h2>Tests
         <v-btn class="ma-2" outlined medium color="indigo" @click="attemptSend(exerciseId, sessionId, value)">
-          <v-icon>mdi-play</v-icon>
-        </v-btn>
-        </h3>
-        <AceEditor @input="onAceEditor"></AceEditor>
+            <v-icon>mdi-fullscreen</v-icon>
+          </v-btn>
+        </h2>
+        <AceEditorTests @input="onAceEditor" :exerciseId="this.exerciseId" :sessionId="this.sessionId"></AceEditorTests>
       </v-col>
+      <v-col cols="12" sm="2" md="6">
+        <h2>Template de résolution
+          <v-btn class="ma-2" outlined medium color="indigo" @click="attemptSend(exerciseId, sessionId, value)">
+            <v-icon>mdi-play</v-icon>
+          </v-btn>
+        </h2>
+        <AceEditorTemplate @input="onAceEditor"></AceEditorTemplate>
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="12" sm="2" md="6">
         <div v-if="attempt != ''">
             <v-card class="mx-auto" color="green" dark width="654" v-if="attempt != null && attempt.valid">
@@ -51,6 +63,7 @@ Le composant 'principale recoit exercise_id et session_id. utiliser watch pour d
             </v-card>
         </div>
         <v-card class="mx-auto" color="#4d4d33" dark width="654" v-if="this.results.stats != null">
+          {{results}}
           <v-card-title>
             <v-icon large left>mdi-alert-outline</v-icon>
             <span class="title font-weight-light">Results</span>
@@ -86,13 +99,15 @@ h1, h2, h3, p {
 
 <script>
 import { mapGetters, mapState, mapActions } from 'vuex'
-import AceEditor from './AceEditor.vue'
+import AceEditorTemplate from './AceEditorTemplate.vue'
+import AceEditorTests from './AceEditorTests.vue'
 import InstructionEditor from './InstructionEditor.vue'
 export default {
 
   name: 'exercises',
   components: {
-    AceEditor,
+    AceEditorTests,
+    AceEditorTemplate,
     InstructionEditor
   },
   watch: {
@@ -151,7 +166,8 @@ export default {
     async attemptSend (exoId, sessId, sol) {
       // Create the attempt
       console.log('Creating the attempt for exercise ' + this.exerciseId + ' and fetch performed on session ' + this.sessionId + ' with solution: ' + sol)
-      await this.createAttemptForSession({ exerciseId: exoId, sessionId: this.sessionId, regions: sol })
+
+      await this.createAttemptForSession({ exerciseId: exoId, sessionId: this.sessionId, regions: [sol, '(\'Hello World\')'] })
       this.results = this.lastAttemptResults
       await this.fetchLastAttemptForExercise({ sessionId: this.sessionId, exerciseId: this.exerciseId })
     },

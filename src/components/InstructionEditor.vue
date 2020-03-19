@@ -37,21 +37,29 @@ import {
   Underline,
   History
 } from 'tiptap-extensions'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions, mapState } from 'vuex'
 
 export default {
 
   name: 'instructionEditor',
-  props: ['exerciseId'],
+  props: ['exerciseId', 'sessionId'],
   components: {
     EditorMenuBar,
     EditorContent
   },
   watch: {
-    exerciseId: function (newId) {
-      console.log(this.getExerciseById(newId))
-      const instructions = this.getExerciseById(newId).instructions
-      this.editor.setContent(instructions)
+    exerciseId: async function (newId) {
+      // Fetch our session
+      await this.fetchSession({ id: this.sessionId })
+
+      // Fetch the exercises of each session
+      await Promise.all(
+        this.sessions.map(s => this.fetchExercisesForSession({ sessionId: s.id }))
+      )
+      this.fetchExerciseForSession({ sessionId: this.sessionId, exerciseId: this.exerciseIdSelected })
+
+      const exercise = this.getExerciseById(this.exerciseId)
+      this.editor.setContent(exercise.instructions)
     }
   },
   data () {
@@ -81,11 +89,30 @@ export default {
   },
 
   computed: {
-    ...mapGetters('exercises', ['getExerciseById'])
+    ...mapGetters('exercises', ['getExerciseById']),
+    ...mapState('sessions', ['sessions'])
   },
   async mounted () {
-    const instructions = this.getExerciseById(this.exerciseId).instructions
-    await this.editor.setContent(instructions)
+    // Fetch our session
+    await this.fetchSession({ id: this.sessionId })
+
+    // Fetch the exercises of each session
+    await Promise.all(
+      this.sessions.map(s => this.fetchExercisesForSession({ sessionId: s.id }))
+    )
+    this.fetchExerciseForSession({ sessionId: this.sessionId, exerciseId: this.exerciseIdSelected })
+
+    const exercise = await this.getExerciseById(this.exerciseId)
+    if (exercise != null) {
+      await this.editor.setContent(exercise.instructions)
+    } else {
+      console.log('Fail to get the exercise')
+    }
+  },
+  methods: {
+    ...mapActions('exercises', ['fetchExercisesForSession']),
+    ...mapActions('exercises', ['fetchExerciseForSession']),
+    ...mapActions('sessions', ['fetchSession'])
   },
   beforeDestroy () {
     this.editor.destroy()

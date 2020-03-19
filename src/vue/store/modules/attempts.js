@@ -58,6 +58,7 @@ const actions = {
   async createAttemptForSession ({ commit }, { exerciseId, sessionId, regions }) {
     const url = '/session/' + sessionId + '/exercise/' + exerciseId + '/attempt'
     /** @type {import('../../../src/utils/HephaistosService').APIResult} */
+    console.log(regions)
     const results = (await axios.post(api(url), { regions })).data
     commit('setLastAttemptResults', { results: results.result })
     if (!results.result.stats.errors && !results.result.stats.failures) {

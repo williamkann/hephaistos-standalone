@@ -24,7 +24,8 @@ export default {
       selectionStyle: 'line',
       cursorStyle: 'ace'
     })
-    this.editor.resize() // Ensure the editor is the right size
+
+    // this.editor.resize() // Ensure the editor is the right size
     // React to changes and update the v-model
     this.editor.on('change', () => {
       this.$emit('input', this.editor.getValue())
@@ -38,6 +39,5 @@ export default {
   position: relative;
   height: 40rem;
   width: 40rem;
-  font-size: 20px;
 }
 </style>
