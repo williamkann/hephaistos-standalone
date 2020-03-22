@@ -66,7 +66,7 @@ export default {
 // eslint-disable-next-line camelcase
 // function set_readonly (editor, readonly_ranges) {
 //   let session = editor.getSession()
-//   this.editor.Range = require('ace/range').Range
+//   this.editor.Range = r.Range
 //   var ranges = []
 
 //   function before (obj, method, wrapper) {
@@ -224,6 +224,7 @@ export default {
 //   }
 //   refresheditor(id, content, readonly_ranges)
 // }
+
 // get_readonly_by_editable_tag('myeditor', content)
 
 // readonly_lines('myeditor', content, [5, 7, 9])
@@ -232,7 +233,7 @@ export default {
 <style scoped>
 .custom-ace-editor {
   position: relative;
-  height: 40rem;
+  height: 50rem;
   width: 40rem;
   font-size: 25px;
 }

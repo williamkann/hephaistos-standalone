@@ -11,6 +11,24 @@
           <button :class="{ 'is-active': isActive.underline() }" @click="commands.underline">
             <v-icon>mdi-format-underline</v-icon>
           </button>
+          <button :class="{ 'is-active': isActive.heading({ levels: 1 }) }" @click="commands.heading({ levels: 1 })">
+            <v-icon>mdi-format-header-1</v-icon>
+          </button>
+          <button :class="{ 'is-active': isActive.heading({ levels: 2 }) }" @click="commands.heading({ levels: 2 })">
+            <v-icon>mdi-format-header-2</v-icon>
+          </button>
+          <button :class="{ 'is-active': isActive.heading({ levels: 3 }) }" @click="commands.heading({ levels: 3 })">
+            <v-icon>mdi-format-header-3</v-icon>
+          </button>
+          <button class="menubar__button" :class="{ 'is-active': isActive.ordered_list() }" @click="commands.ordered_list">
+            <icon name="ol" />
+          </button>
+          <button class="menubar__button" :class="{ 'is-active': isActive.bullet_list() }" @click="commands.bullet_list">
+            <v-icon>mdi-format-list-bulleted</v-icon>
+          </button>
+          <button :class="{ 'is-active': isActive.underline() }" @click="commands.underline">
+            <icon name="strike" />
+          </button>
       </div>
     </editor-menu-bar>
     <editor-content style="color:white;background:grey;" :editor="editor" />
@@ -18,6 +36,7 @@
 </template>
 
 <script>
+import Icon from './Icon'
 import { Editor, EditorContent, EditorMenuBar } from 'tiptap'
 import {
   Blockquote,
@@ -45,7 +64,8 @@ export default {
   props: ['exerciseId', 'sessionId'],
   components: {
     EditorMenuBar,
-    EditorContent
+    EditorContent,
+    Icon
   },
   watch: {
     exerciseId: async function (newId) {
@@ -116,6 +136,9 @@ export default {
   },
   beforeDestroy () {
     this.editor.destroy()
+  },
+  exerciseInstructions (instructions) {
+    this.$emit('exerciseInstructions', instructions)
   }
 }
 </script>

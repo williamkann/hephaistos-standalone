@@ -8,7 +8,10 @@ Le composant 'principale recoit exercise_id et session_id. utiliser watch pour d
     <v-alert outlined color="#3366cc">
     <v-row>
       <v-col cols="12" sm="2" md="6">
-        <h1>{{ exercise.title }}</h1>
+          <v-text-field
+            label="Regular"
+            v-model="exercise.title"
+          ></v-text-field>
       </v-col>
       <v-col cols="12" sm="2" md="3">
          <v-select
@@ -133,7 +136,7 @@ export default {
   },
   watch: {
     exerciseId: function (newVal) {
-      console.log('(In exercises.vue): Request the exercise ' + newVal)
+      console.log('(In DoWork.vue): Request the exercise ' + newVal)
     }
   },
   props: ['exerciseId'],
@@ -181,6 +184,7 @@ export default {
   },
   async mounted () {
     await this.fetchLastAttemptForExercise({ sessionId: this.sessionId, exerciseId: this.exerciseId })
+    this.select = this.exercise.lang
   },
 
   methods: {
@@ -188,6 +192,7 @@ export default {
     ...mapActions('sessions', ['fetchSession']),
     ...mapActions('attempts', ['createAttemptForSession']),
     ...mapActions('attempts', ['fetchLastAttemptForExercise']),
+    ...mapActions('exercises', ['updateExerciseForSession']),
     async attemptSend (exoId, sessId, sol) {
       // Create the attempt
       console.log('Creating the attempt for exercise ' + this.exerciseId + ' and fetch performed on session ' + this.sessionId + ' with solution: ' + sol)
@@ -208,7 +213,11 @@ export default {
     },
     saveExercise () {
       console.log(this.select)
-      console.log(this.exercise)
+      console.log(this.exercise.title)
+      this.updateExerciseForSession({ id: this.exerciseId, sessionId: this.sessionId, exercise: this.exercise })
+      console.log('DONE')
+      // this.exercise.instructions =
+      // this.updateExerciseForSession ({ commit }, { id, sessionId, exercise })
     }
   }
 }
