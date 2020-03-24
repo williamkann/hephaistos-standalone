@@ -136,6 +136,8 @@ export default {
   },
   watch: {
     exerciseId: function (newVal) {
+      this.initResult()
+      this.fetchExerciseForSession({ sessionId: this.sessionId, exerciseId: newVal })
       console.log('(In DoWork.vue): Request the exercise ' + newVal)
     }
   },
@@ -161,8 +163,6 @@ export default {
     },
     exercise () {
       console.log('(In DoWork.vue) : Fetch the exercise ' + this.exerciseId + ' and getExerciseById performed')
-      this.initResult()
-      this.fetchExerciseForSession({ sessionId: this.sessionId, exerciseId: this.exerciseId })
       return this.getExerciseById(this.exerciseId) || { name: 'Loading...' }
     },
     attempt () {
@@ -211,10 +211,10 @@ export default {
     initResult () {
       this.results = ''
     },
-    saveExercise () {
+    async saveExercise () {
       console.log(this.select)
       console.log(this.exercise.title)
-      this.updateExerciseForSession({ id: this.exerciseId, sessionId: this.sessionId, exercise: this.exercise })
+      await this.updateExerciseForSession({ id: this.exerciseId, sessionId: this.sessionId, exercise: this.exercise })
       console.log('DONE')
       // this.exercise.instructions =
       // this.updateExerciseForSession ({ commit }, { id, sessionId, exercise })

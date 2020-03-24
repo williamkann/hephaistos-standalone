@@ -37,6 +37,7 @@ export default {
 <style scoped>
 .custom-ace-editor {
   position: relative;
+  font-size:1.1rem;
   height: 40rem;
   width: 40rem;
 }
