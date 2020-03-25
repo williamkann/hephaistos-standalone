@@ -50,9 +50,6 @@ Le composant 'principale recoit exercise_id et session_id. utiliser watch pour d
               </v-btn>
             </h2>
           </v-col>
-          <v-col cols="12" sm="2" md="4">
-            <v-checkbox v-model="checkbox1" :label="immutable"></v-checkbox>
-          </v-col>
         </v-row>
         <AceEditorTemplate @input="onAceEditor"></AceEditorTemplate>
       </v-col>
@@ -145,8 +142,6 @@ export default {
   data: () => ({
     value: '',
     results: '',
-    immutable: 'Verrouiller les zones immuables',
-    checkbox1: '',
     select: '',
     items: ['python', 'C']
   }),
