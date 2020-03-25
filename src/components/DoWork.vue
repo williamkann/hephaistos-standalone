@@ -125,7 +125,7 @@ import AceEditorTests from './AceEditorTests.vue'
 import InstructionEditor from './InstructionEditor.vue'
 export default {
 
-  name: 'exercises',
+  name: 'doWork',
   components: {
     AceEditorTests,
     AceEditorTemplate,
@@ -209,6 +209,7 @@ export default {
     async saveExercise () {
       console.log(this.select)
       console.log(this.exercise.title)
+      console.log('exercise', JSON.parse(JSON.stringify(this.exercise)))
       await this.updateExerciseForSession({ id: this.exerciseId, sessionId: this.sessionId, exercise: this.exercise })
       console.log('DONE')
       // this.exercise.instructions =

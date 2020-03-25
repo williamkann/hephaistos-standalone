@@ -3,6 +3,7 @@
     <v-row>
         <v-col cols="12" sm="2" md="12">
           <v-checkbox v-model="checkbox" :label="immutable" @click="readOnlyLines(editor.getValue, [1,2,3, 5, 6, 7,9,10, 17])"></v-checkbox>
+          <!-- <button @click="readOnlyLines(editor.getValue, [1,2,3, 5, 6, 7,9,10, 17])">Readonly lines 1 and 3 and 7 and 10</button> -->
         </v-col>
     </v-row>
     <v-row>
@@ -31,41 +32,23 @@ export default {
   methods: {
     // readOnlyLines
     readOnlyLines (content, lineNumbers) {
-      if (this.checkbox === true) {
-        var readonlyRanges = []
-        console.log(lineNumbers)
+      var readonlyRanges = []
+      console.log(lineNumbers)
 
-        for (var i = 0; i < lineNumbers.length; i++) {
-          readonlyRanges.push([lineNumbers[i] - 1, 0, lineNumbers[i], 0])
-        }
-        this.refreshEditor(content, readonlyRanges)
+      // We select the ranges to put in the array. format : like Range class
+      for (var i = 0; i < lineNumbers.length; i++) {
+        readonlyRanges.push([lineNumbers[i] - 1, 0, lineNumbers[i], 0])
       }
+      // Send to refresh to update the editor.
+      this.refreshEditor(content, readonlyRanges)
     },
     // refresheditor
     refreshEditor (content, readonly) {
-      //     this.editor.setValue(content)
-      this.setReadonly(this.editor, readonly)
+      // Use setReadonly
+      this.setReadonly(this.editor, readonly, this.checkbox)
     },
 
-    // getReadonlyByEditableTag
-    getReadonlyByEditableTag (id, content) {
-      var text = content.split('\n')
-      var starts = [0]
-      var ends = []
-      text.forEach(function (line, index) {
-        if ((line.indexOf('&lt;editable&gt;') !== -1))ends.push(index)
-        if ((line.indexOf('&lt;/editable&gt;') !== -1))starts.push(index + 1)
-      })
-
-      ends.push(text.length)
-      var readonlyRanges = []
-      for (var i = 0; i < starts.length; i++) {
-        readonlyRanges.push([starts[i], 0, ends[i], 0])
-      }
-      this.refreshEditor(content, readonlyRanges)
-    },
-
-    setReadonly (editor, readonlyRanges) {
+    setReadonly (editor, readonlyRanges, checkbox) {
     // getSession returns the current session we are using.
       var session = editor.getSession()
       // Get the range object
@@ -83,7 +66,6 @@ export default {
         obj[method] = function () {
           // args est l'array suivant [editor, 'onPaste', preventReadonly] ou [editor, 'onCut', preventReadonly]
           var args = Array.prototype.slice.call(arguments)
-
           // preventReadonly.call(this, orig qui est obj['onPaste'] tu apply .(editor, args))
           return wrapper.call(this, function () {
             return orig.apply(obj, args)
@@ -161,23 +143,40 @@ export default {
 
       session.setMode('ace/mode/python')
 
-      editor.keyBinding.addKeyboardHandler({
-        handleKeyboard: function (data, hash, keyString, keyCode, event) {
-          if (Math.abs(keyCode) === 13 && onEnd(editor.getCursorPosition())) {
-            return false
-          }
-          if (hash === -1 || (keyCode <= 40 && keyCode >= 37)) return false
-
-          for (var i = 0; i < ranges.length; i++) {
-            if (intersects(ranges[i])) {
-              return { command: 'null', passEvent: false }
+      if (checkbox === true) {
+        console.log('DEDE')
+        editor.keyBinding.addKeyboardHandler({
+          handleKeyboard: function (data, hash, keyString, keyCode, event) {
+            if (Math.abs(keyCode) === 13 && onEnd(editor.getCursorPosition())) {
+              return false
+            }
+            if (hash === -1 || (keyCode <= 40 && keyCode >= 37)) return false
+            for (var i = 0; i < ranges.length; i++) {
+              if (intersects(ranges[i])) {
+                return { command: 'null', passEvent: false }
+              }
             }
           }
-        }
 
-      })
+        })
+      } else {
+        console.log('frfr')
+        editor.keyBinding.removeKeyboardHandler({
+          handleKeyboard: function (data, hash, keyString, keyCode, event) {
+            if (Math.abs(keyCode) === 13 && onEnd(editor.getCursorPosition())) {
+              return false
+            }
+            if (hash === -1 || (keyCode <= 40 && keyCode >= 37)) return false
 
-      // Use of before methode
+            for (var i = 0; i < ranges.length; i++) {
+              if (intersects(ranges[i])) {
+                return { command: 'null', passEvent: false }
+              }
+            }
+          }
+        })
+      }
+
       before(editor, 'onPaste', preventReadonly)
       before(editor, 'onCut', preventReadonly)
 

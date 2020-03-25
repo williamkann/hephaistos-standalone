@@ -5,6 +5,7 @@ import Modules from '../components/Modules.vue'
 import store from '../vue/store/index.js'
 import Module from '../components/Module.vue'
 import Exercises from '../components/Exercises.vue'
+import ExerciseNew from '../components/ExerciseNew.vue'
 
 Vue.use(VueRouter)
 /*
@@ -45,6 +46,12 @@ const routes = [
     path: '/session/:sessionId/exercise/:exerciseId',
     name: 'exercises',
     component: Exercises,
+    beforeEnter
+  },
+  {
+    path: '/session/:sessionId/exercise/:exerciseId',
+    name: 'newExercise',
+    component: ExerciseNew,
     beforeEnter
   }
 ]

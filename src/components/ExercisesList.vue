@@ -5,18 +5,21 @@
 <!-- Les composants ne sont pas re-rendus lorsqu'on change d'exercise. Mais il faut juste changer les parametres
 Le composant 'principale recoit exercise_id et sssion_id. utiliser watch pour déclencher la mise à jour -->
 <!-- watch:  -->
-  <v-card class="mx-auto" max-width="500" tile>
-    <v-list shaped>
-      <v-subheader>Editeur d'exercises</v-subheader>
-      <v-list-item-group color="primary">
-        <v-list-item v-for="exercise in getExercisesBySessionId(sessionId)" :key="exercise.id">
-          <v-list-item-content>
-            <v-list-item-title @click="exerciseSelected(exercise.id)">{{ exercise.title }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list-item-group>
-    </v-list>
-  </v-card>
+    <v-btn class="ma-2" outlined small color="indigo" @click="createNewExercise()">
+      <v-icon>mdi-plus</v-icon>
+    </v-btn>
+    <v-card class="mx-auto" max-width="500" tile>
+      <v-list shaped>
+        <v-subheader>Editeur d'exercises</v-subheader>
+        <v-list-item-group color="primary">
+          <v-list-item v-for="exercise in getExercisesBySessionId(sessionId)" :key="exercise.id">
+            <v-list-item-content>
+              <v-list-item-title @click="exerciseSelected(exercise.id)">{{ exercise.title }}</v-list-item-title>
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list>
+    </v-card>
   </v-container>
 </template>
 
@@ -64,6 +67,9 @@ export default {
     signOut () {
       this.logout()
       this.$router.push({ name: 'login' })
+    },
+    createNewExercise () {
+      this.$router.push({ name: 'newExercise', params: { sessionId: this.sessionId, exerciseId: this.exercises.length } })
     }
   }
 }
