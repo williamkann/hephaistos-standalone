@@ -1,6 +1,5 @@
 <template>
   <div>
-    <button @click="readOnlyLines(editor.getValue, [1,2,3, 5, 6, 7,9,10, 17])">Readonly lines 1 and 3 and 7 and 10</button>
     <div class="exercise-editor-ace-editor" :style='{ height: editorHeight }' ref="editor" />
   </div>
 </template>
@@ -20,7 +19,7 @@ export default {
     exerciseId: Number,
     editorHeight: {
       type: String,
-      default: '40rem'
+      default: '51rem'
     }
   }, // Mandatory to allow v-model
   data () {
@@ -57,7 +56,7 @@ export default {
   },
   async mounted () {
     this.editor = ace.edit(this.$refs.editor)
-    this.editor.setTheme('ace/theme/monokai') // Global theme for
+    this.editor.setTheme('ace/theme/monokai')
     this.editor.session.setMode(`ace/mode/${this.editorLang}`)
     this.editor.selection.addRange()
     this.editor.setOptions({
@@ -68,10 +67,8 @@ export default {
     console.log(this.exerciseId)
     await this.editor.setValue(this.getExerciseById(this.exerciseId).tests)
 
-    // this.editor.resize() // Ensure the editor is the right size
-    // React to changes and update the v-model
     this.editor.on('change', () => {
-      this.$emit('input', this.editor.getValue())
+      this.$emit('inputTest', this.editor.getValue())
     })
   }
 }

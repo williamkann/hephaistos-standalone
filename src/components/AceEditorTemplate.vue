@@ -1,11 +1,9 @@
 <template>
   <div>
-    <v-row>
-        <v-col cols="12" sm="2" md="12">
-          <v-checkbox v-model="checkbox" :label="immutable" @click="readOnlyLines(editor.getValue, [1,2,3, 5, 6, 7,9,10, 17])"></v-checkbox>
-          <!-- <button @click="readOnlyLines(editor.getValue, [1,2,3, 5, 6, 7,9,10, 17])">Readonly lines 1 and 3 and 7 and 10</button> -->
-        </v-col>
-    </v-row>
+    <v-col cols="12" sm="2" md="12">
+      <!-- Freeze Readonly lines here -->
+      <v-checkbox v-model="checkbox" :label="immutable" @click="readOnlyLines(editor.getValue, [1,2,3, 5, 6, 7,9,10, 17])"></v-checkbox>
+    </v-col>
     <v-row>
       <v-col cols="12" sm="2" md="12">
         <div class="exercise-editor-ace-editor" ref="editor" />
@@ -26,7 +24,7 @@ export default {
       editor: null,
       editorLang: 'python',
       immutable: 'Verrouiller les zones immuables',
-      checkbox: '' // Defaults to 'python'
+      checkbox: ''
     }
   },
   methods: {
@@ -211,7 +209,7 @@ export default {
   },
   mounted () {
     this.editor = ace.edit(this.$refs.editor)
-    this.editor.setTheme('ace/theme/monokai') // Global theme for
+    this.editor.setTheme('ace/theme/monokai')
     this.editor.session.setMode(`ace/mode/${this.editorLang}`)
     this.editor.selection.addRange()
     this.editor.setOptions({
@@ -219,7 +217,7 @@ export default {
       cursorStyle: 'ace'
     })
     this.editor.on('change', () => {
-      this.$emit('input', this.editor.getValue())
+      this.$emit('inputTemplate', this.editor.getValue())
     })
   }
 }
@@ -229,7 +227,7 @@ export default {
 .exercise-editor-ace-editor {
   position: relative;
   font-size: 1.3rem;
-  line-height: 1.5;
+  line-height: 1.8;
   height: 40rem;
 }
 .readonly-highlight {

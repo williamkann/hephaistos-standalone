@@ -2,6 +2,8 @@
   <div class="instruction">
     <editor-menu-bar :editor="editor" v-slot="{ commands, isActive }">
       <div>
+        <h1><v-icon>mdi-file-outline</v-icon> Consignes</h1>
+          <v-checkbox v-model="editable" class="mx-2" label="Edit"></v-checkbox>
           <button :class="{ 'is-active': isActive.bold() }" @click="commands.bold">
             <v-icon>mdi-format-bold</v-icon>
           </button>
@@ -20,14 +22,17 @@
           <button :class="{ 'is-active': isActive.heading({ levels: 3 }) }" @click="commands.heading({ levels: 3 })">
             <v-icon>mdi-format-header-3</v-icon>
           </button>
-          <button class="menubar__button" :class="{ 'is-active': isActive.ordered_list() }" @click="commands.ordered_list">
-            <icon name="ol" />
+          <button :class="{ 'is-active': isActive.ordered_list() }" @click="commands.ordered_list">
+            <v-icon>mdi-view-list</v-icon>
           </button>
-          <button class="menubar__button" :class="{ 'is-active': isActive.bullet_list() }" @click="commands.bullet_list">
+          <button :class="{ 'is-active': isActive.bullet_list() }" @click="commands.bullet_list">
             <v-icon>mdi-format-list-bulleted</v-icon>
           </button>
-          <button :class="{ 'is-active': isActive.underline() }" @click="commands.underline">
-            <icon name="strike" />
+          <button @click="commands.undo">
+            <v-icon> mdi-undo</v-icon>
+          </button>
+          <button @click="commands.redo">
+            <v-icon> mdi-redo</v-icon>
           </button>
       </div>
     </editor-menu-bar>
@@ -36,7 +41,6 @@
 </template>
 
 <script>
-import Icon from './Icon'
 import { Editor, EditorContent, EditorMenuBar } from 'tiptap'
 import {
   Blockquote,
@@ -64,8 +68,7 @@ export default {
   props: ['exerciseId', 'sessionId'],
   components: {
     EditorMenuBar,
-    EditorContent,
-    Icon
+    EditorContent
   },
   watch: {
     exerciseId: async function (newId) {
@@ -80,6 +83,11 @@ export default {
 
       const exercise = this.getExerciseById(this.exerciseId)
       this.editor.setContent(exercise.instructions)
+    },
+    editable () {
+      this.editor.setOptions({
+        editable: this.editable
+      })
     }
   },
   data () {
@@ -103,8 +111,11 @@ export default {
           new Underline(),
           new History()
         ],
-        content: ''
-      })
+        content: '',
+        editable: false
+      }),
+      editable: false,
+      showInstruc: true
     }
   },
 

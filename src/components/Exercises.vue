@@ -18,10 +18,12 @@ Le composant 'principal' recoit exercise_id et session_id. utiliser watch pour d
       <!-- Col with exercisesList on the left and DoWork on the right -->
       <v-row>
         <v-col cols="12" sm="2" md="2">
-          <ExercisesList @exerciseSelected="onExerciseSelected"/>
+          <div v-show="fullscreen">
+            <ExercisesList @exerciseSelected="onExerciseSelected"/>
+          </div>
         </v-col>
-        <v-col cols="12" sm="2" md="10">
-          <DoWork :exerciseId="exerciseIdSelected" />
+        <v-col cols="12" sm="2" :md="editorSize">
+          <DoWork :exerciseId="exerciseIdSelected" @fullscreenChanged="onFullscreenChanged"/>
         </v-col>
       </v-row>
     </v-card>
@@ -48,7 +50,11 @@ export default {
   },
 
   data () {
-    return { exerciseIdSelected: parseInt(this.$route.params.exerciseId) }
+    return {
+      exerciseIdSelected: parseInt(this.$route.params.exerciseId),
+      fullscreen: 'true',
+      editorSize: 10
+    }
   },
 
   computed: {
@@ -100,6 +106,14 @@ export default {
     },
     sendPrevious () {
       this.$router.push({ name: 'module', params: { moduleId: 1 } })
+    },
+    onFullscreenChanged (fullscreenReceived) {
+      this.fullscreen = fullscreenReceived
+      if (this.fullscreen === true) {
+        this.editorSize = 10
+      } else {
+        this.editorSize = 12
+      }
     }
   }
 }

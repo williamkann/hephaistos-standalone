@@ -1,63 +1,100 @@
 <template>
   <v-container>
-
-<!-- La vue étudiante, url dans quel on est session/3/exercise/15 -->
-<!-- Les composants ne sont pas re-rendus lorsqu'on change d'exercise. Mais il faut juste changer les parametres
-Le composant 'principale recoit exercise_id et session_id. utiliser watch pour déclencher la mise à jour -->
-<!-- watch:  -->
     <v-alert outlined color="#3366cc">
+    <div v-show="fullscreen">
+      <v-row>
+        <v-col cols="12" sm="2" md="6">
+            <v-text-field
+              label="Regular"
+              v-model="exercise.title"
+            ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="2" md="3">
+          <v-select
+            v-model="select"
+            :items="items"
+            label="Langage"
+            required
+          ></v-select>
+        </v-col>
+        <v-col cols="12" sm="2" md="3">
+          <v-btn class="ma-2" outlined small color="indigo" @click="saveExercise">
+            <v-icon>mdi-content-save</v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12" sm="2" md="12">
+          <button @click="showInstruction">
+            <v-icon>mdi-eye</v-icon>
+          </button>
+          <div v-if="instructionShow">
+            <InstructionEditor :exerciseId="this.exerciseId" :sessionId="this.sessionId"></InstructionEditor>
+          </div>
+        </v-col>
+      </v-row>
+    </div>
     <v-row>
-      <v-col cols="12" sm="2" md="6">
-          <v-text-field
-            label="Regular"
-            v-model="exercise.title"
-          ></v-text-field>
-      </v-col>
-      <v-col cols="12" sm="2" md="3">
-         <v-select
-          v-model="select"
-          :items="items"
-          label="Langage"
-          required
-        ></v-select>
-      </v-col>
-      <v-col cols="12" sm="2" md="3">
-        <v-btn class="ma-2" outlined small color="indigo" @click="saveExercise">
-          <v-icon>mdi-content-save</v-icon>
-        </v-btn>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" sm="2" md="12">
-        <InstructionEditor :exerciseId="this.exerciseId" :sessionId="this.sessionId"></InstructionEditor>
-      </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12" sm="2" md="6">
+      <v-col cols="12" sm="2" :md="editorSize">
         <h2>Tests
-          <v-btn class="ma-2" outlined small color="indigo" @click="attemptSend(exerciseId, sessionId, value)">
-            <v-icon>mdi-fullscreen</v-icon>
+          <v-btn class="ma-2" outlined small color="indigo" @click="makeFullscreen()">
+            <div v-if="fullscreen">
+              <v-icon>mdi-fullscreen</v-icon>
+            </div>
+            <div v-else>
+              <v-icon>mdi-fullscreen-exit</v-icon>
+            </div>
           </v-btn>
         </h2>
-        <AceEditorTests @input="onAceEditor" :exerciseId="this.exerciseId" :sessionId="this.sessionId"></AceEditorTests>
+        <AceEditorTests @inputTest="onAceEditorTest" :exerciseId="this.exerciseId" :sessionId="this.sessionId"></AceEditorTests>
       </v-col>
       <v-col cols="12" sm="2" md="6">
-        <v-row>
-          <v-col cols="12" sm="2" md="8">
-            <h2>Template de résolution
-              <v-btn class="ma-2" outlined small color="indigo" @click="attemptSend(exerciseId, sessionId, value)">
-                <v-icon>mdi-play</v-icon>
-              </v-btn>
-            </h2>
-          </v-col>
-        </v-row>
-        <AceEditorTemplate @input="onAceEditor"></AceEditorTemplate>
+        <div v-show="fullscreen">
+          <v-row>
+            <v-col cols="12" sm="2" md="8">
+              <h2>Template de résolution
+                <v-btn class="ma-2" outlined small color="indigo" @click="attemptSend(exerciseId, sessionId, valueTemplate); runSandbox()">
+                  <v-icon>mdi-play</v-icon>
+                </v-btn>
+              </h2>
+            </v-col>
+          </v-row>
+          <AceEditorTemplate @inputTemplate="onAceEditorTemplate"></AceEditorTemplate>
+         </div>
       </v-col>
     </v-row>
     <v-row>
+      <v-col cols="12" sm="2" :md="editorSize">
+        <h2><v-icon>mdi-console</v-icon> Sortie de console</h2>
+        <div>{{this.consoleOutput}}</div>
+      </v-col>
       <v-col cols="12" sm="2" md="6">
-        <h2>Sortie de console</h2>
-        <v-card class="mx-auto" color="#4d4d33" dark width="654" v-if="this.results.stats != null">
+        <div v-show="fullscreen">
+          <h2><v-icon>mdi-sort-variant</v-icon> Résultat des tests</h2>
+          <div v-if="attempt != ''">
+              <v-card class="mx-auto" color="green" dark width="654" v-if="attempt != null && attempt.valid">
+                <v-card-title>
+                  <v-icon medium left>mdi-check</v-icon>
+                  <span class="title font-weight-light">Results</span>
+                </v-card-title>
+                <v-card-text class="font-weight-bold">
+                    <p>{{attempt.valid_tests}} tests validé(s)</p>
+                    <p>{{attempt.invalid_tests}} tests invalide(s)</p>
+                    <div v-if="attempt.syntax_error"><p>Syntaxe err !</p></div>
+                </v-card-text>
+              </v-card>
+              <v-card class="mx-auto" color="red" dark width="654" v-if="attempt != null && !attempt.valid">
+                <v-card-title>
+                  <v-icon large left>mdi-close</v-icon>
+                  <span class="title font-weight-light">Errors</span>
+                </v-card-title>
+                <v-card-text class="font-weight-bold">
+                    <p>{{attempt.valid_tests}} tests validé(s)</p>
+                    <p>{{attempt.invalid_tests}} tests invalide(s)</p>
+                    <div v-if="attempt.syntax_error"><p>Syntaxe err !</p></div>
+                </v-card-text>
+              </v-card>
+              <v-card class="mx-auto" color="#4d4d33" dark width="654" v-if="this.results.stats != null">
           <v-card-title>
             <v-icon large left>mdi-alert-outline</v-icon>
             <span class="title font-weight-light">Results</span>
@@ -69,42 +106,17 @@ Le composant 'principale recoit exercise_id et session_id. utiliser watch pour d
               <p>Execution time: {{this.results.stats.time }}s</p>
           </v-card-text>
         </v-card>
-        <v-expansion-panels v-if="results.tests != null">
-          <v-expansion-panel v-for="test in this.results.tests" :key="test.id">
-            <v-expansion-panel-header>{{test.name}}</v-expansion-panel-header>
-            <div v-if="test.failure != null">
-              <v-expansion-panel-content v-html="test.failure.stacktrace">
-              </v-expansion-panel-content>
-              {{test.failure.message}}
-            </div>
-          </v-expansion-panel>
-        </v-expansion-panels>
-      </v-col>
-      <v-col cols="12" sm="2" md="6">
-        <h2>Résultat des tests</h2>
-        <div v-if="attempt != ''">
-            <v-card class="mx-auto" color="green" dark width="654" v-if="attempt != null && attempt.valid">
-              <v-card-title>
-                <v-icon medium left>mdi-check</v-icon>
-                <span class="title font-weight-light">Results</span>
-              </v-card-title>
-              <v-card-text class="font-weight-bold">
-                  <p>{{attempt.valid_tests}} tests validé(s)</p>
-                  <p>{{attempt.invalid_tests}} tests invalide(s)</p>
-                  <div v-if="attempt.syntax_error"><p>Syntaxe err !</p></div>
-              </v-card-text>
-            </v-card>
-            <v-card class="mx-auto" color="red" dark width="654" v-if="attempt != null && !attempt.valid">
-              <v-card-title>
-                <v-icon large left>mdi-close</v-icon>
-                <span class="title font-weight-light">Errors</span>
-              </v-card-title>
-              <v-card-text class="font-weight-bold">
-                  <p>{{attempt.valid_tests}} tests validé(s)</p>
-                  <p>{{attempt.invalid_tests}} tests invalide(s)</p>
-                  <div v-if="attempt.syntax_error"><p>Syntaxe err !</p></div>
-              </v-card-text>
-            </v-card>
+            <v-expansion-panels v-if="results.tests != null">
+              <v-expansion-panel v-for="test in this.results.tests" :key="test.id">
+                <v-expansion-panel-header>{{test.name}}</v-expansion-panel-header>
+                <div v-if="test.failure != null">
+                  <v-expansion-panel-content v-html="test.failure.stacktrace">
+                  </v-expansion-panel-content>
+                  {{test.failure.message}}
+                </div>
+              </v-expansion-panel>
+            </v-expansion-panels>
+          </div>
         </div>
       </v-col>
     </v-row>
@@ -113,7 +125,7 @@ Le composant 'principale recoit exercise_id et session_id. utiliser watch pour d
 </template>
 
 <style scoped>
-h1, h2, h3, p {
+h1, h2, h3, p, div{
   color: white
 }
 </style>
@@ -123,6 +135,7 @@ import { mapGetters, mapState, mapActions } from 'vuex'
 import AceEditorTemplate from './AceEditorTemplate.vue'
 import AceEditorTests from './AceEditorTests.vue'
 import InstructionEditor from './InstructionEditor.vue'
+
 export default {
 
   name: 'doWork',
@@ -140,10 +153,15 @@ export default {
   },
   props: ['exerciseId'],
   data: () => ({
-    value: '',
+    valueTemplate: '',
+    valueTest: '',
+    consoleOutput: '',
     results: '',
     select: '',
-    items: ['python', 'C']
+    fullscreen: 'false',
+    items: ['python', 'C'],
+    editorSize: '6',
+    instructionShow: true
   }),
 
   computed: {
@@ -179,7 +197,8 @@ export default {
   },
   async mounted () {
     await this.fetchLastAttemptForExercise({ sessionId: this.sessionId, exerciseId: this.exerciseId })
-    this.select = this.exercise.lang
+    this.select = await this.exercise.lang
+    this.valueTest = await this.exercise.tests
   },
 
   methods: {
@@ -192,12 +211,32 @@ export default {
       // Create the attempt
       console.log('Creating the attempt for exercise ' + this.exerciseId + ' and fetch performed on session ' + this.sessionId + ' with solution: ' + sol)
 
-      await this.createAttemptForSession({ exerciseId: exoId, sessionId: this.sessionId, regions: [sol, '(\'Hello World\')'] })
+      await this.createAttemptForSession({ exerciseId: exoId, sessionId: this.sessionId, regions: [sol, ''] })
       this.results = this.lastAttemptResults
       await this.fetchLastAttemptForExercise({ sessionId: this.sessionId, exerciseId: this.exerciseId })
     },
-    onAceEditor (input) {
-      this.value = input
+    runSandbox () {
+      console.log('running sandbox...')
+      const tests = this.valueTest
+      const solution = this.valueTemplate
+      this.axios.post('http://localhost:3000/api/v1/exercise/sandbox', {
+        lang: this.exercise.lang,
+        tests,
+        solution
+      })
+        .then((response) => {
+          this.consoleOutput = response.data.stdout
+        })
+        .catch((err) => {
+          console.log(err)
+          console.log(err.response)
+        })
+    },
+    onAceEditorTemplate (inputTemplate) {
+      this.valueTemplate = inputTemplate
+    },
+    onAceEditorTest (inputTest) {
+      this.valueTest = inputTest
     },
     signOut () {
       this.logout()
@@ -211,9 +250,24 @@ export default {
       console.log(this.exercise.title)
       console.log('exercise', JSON.parse(JSON.stringify(this.exercise)))
       await this.updateExerciseForSession({ id: this.exerciseId, sessionId: this.sessionId, exercise: this.exercise })
-      console.log('DONE')
-      // this.exercise.instructions =
-      // this.updateExerciseForSession ({ commit }, { id, sessionId, exercise })
+    },
+    makeFullscreen () {
+      if (this.fullscreen === false) {
+        this.fullscreen = true
+        this.editorSize = 6
+        this.$emit('fullscreenChanged', this.fullscreen)
+      } else {
+        this.fullscreen = false
+        this.editorSize = 12
+        this.$emit('fullscreenChanged', this.fullscreen)
+      }
+    },
+    showInstruction () {
+      if (this.instructionShow === true) {
+        this.instructionShow = false
+      } else {
+        this.instructionShow = true
+      }
     }
   }
 }

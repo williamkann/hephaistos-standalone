@@ -147,6 +147,7 @@ const actions = {
     await axios.delete(api('/session/' + sessionId + '/exercise/' + exerciseId))
     commit('deleteExercise', { exerciseId })
   }
+
 }
 
 export default {
